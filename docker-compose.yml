@@ -1,0 +1,90 @@
+version: '3'
+
+services:
+  
+  # Traffics lights
+  red-container: 
+    container_name: red
+    build: 
+      context: ./red
+      dockerfile: ./Dockerfile
+      
+    ports:
+      - "80"
+    networks: 
+      - LAN
+
+  yellow-container: 
+    container_name: yellow
+    build: 
+      context: ./yellow
+      dockerfile: ./Dockerfile
+      
+    ports:
+      - "80"
+    networks: 
+      - LAN
+
+  green-container: 
+    container_name: green
+    build: 
+      context: ./green
+      dockerfile: .//Dockerfile
+      
+    ports:
+      - "80"
+    networks: 
+      - LAN
+
+
+
+
+  
+  # Servers 
+  reverse-proxy:
+    image: nginx:1.21
+    volumes:
+      - ./reverse-proxy/config/:/etc/nginx/conf.d
+      - ./reverse-proxy/logs/:/var/log/nginx/
+
+    networks: 
+     - LAN
+    ports:
+      - "3000:3000"
+      - "4000:4000"
+      - "5000:5000"
+
+    links:
+      - red-container
+      - yellow-container
+      - green-container
+
+
+  balancer-proxy:
+    image: nginx:1.21
+    volumes:
+      - ./balancer/config/:/etc/nginx/conf.d
+      - ./balancer/logs/:/var/log/nginx/
+
+    networks: 
+     - LAN
+    ports:
+      - "8080:80"
+
+    links:
+      - red-container
+      - yellow-container
+      - green-container
+
+
+
+
+
+# Network
+networks:
+  LAN:
+    ipam: # Configuracion de enrutado en docker
+      config: 
+        - subnet: 172.20.0.0/16  # Mascara de red 
+          gateway: 172.20.0.1  # Gateway, conectara a los servicios entre ellos:
+

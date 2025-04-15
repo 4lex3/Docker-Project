@@ -19,7 +19,7 @@ RUN npm install
 COPY app.js ./
 
 # 1.1.6 | Copy the "index.pug" and "favicon.ico" files to the "/app/views" directory
-RUN mkdir -f views
+RUN mkdir -p views
 COPY index.pug ./views
 COPY favicon.ico ./views
 
